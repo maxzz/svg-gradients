@@ -8,17 +8,23 @@
       <defs>
         <radialGradient
           id="myGradient"
-          :r="defs.r.value"
-          :cx="defs.cx.value"
-          :cy="defs.cy.value"
-          :fr="defs.fr.value"
           :fx="defs.fx.value"
           :fy="defs.fy.value"
+          :fr="defs.fr.value"
+          :cx="defs.cx.value"
+          :cy="defs.cy.value"
+          :r="defs.r.value"
         >
           <stop offset="0%" stop-color="gold" />
+          <stop offset="10%" stop-color="gold" />
+
           <stop offset="10%" stop-color="green" />
+          <stop offset="30%" stop-color="green" />
+
           <stop offset="30%" stop-color="black" />
-          <stop offset="41%" stop-color="red" />
+          <stop offset="40%" stop-color="black" />
+
+          <stop offset="40%" stop-color="red" />
           <stop offset="100%" stop-color="red" />
         </radialGradient>
       </defs>
@@ -66,28 +72,28 @@ export default defineComponent({
         let defs = reactive<Sliders>({
             fx: {
                 label: 'fx',
-                value: 0.5,
+                value: 0.811,
                 min: 0.01,
                 max: 2,
                 step: 0.001,
             },
             fy: {
                 label: 'fy',
-                value: 0.5,
+                value: 0.53,
                 min: 0.01,
                 max: 2,
                 step: 0.001,
             },
             fr: {
                 label: 'fr',
-                value: 0.02,
+                value: 0.01,
                 min: 0.01,
                 max: 1,
                 step: 0.01,
             },
             cx: {
                 label: 'cx',
-                value: 0.7,
+                value: 0.06,
                 min: 0.01,
                 max: 4,
                 step: 0.01,
@@ -101,7 +107,7 @@ export default defineComponent({
             },
             r: {
                 label: 'r',
-                value: 0.5,
+                value: 0.84,
                 min: 0.01,
                 max: 4,
                 step: 0.01,
@@ -136,5 +142,6 @@ export default defineComponent({
 svg {
     width: 300px;
     height: 300px;
+    background-color: tomato;
 }
 </style>
