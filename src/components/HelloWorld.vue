@@ -55,48 +55,50 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "HelloWorld",
-  props: {},
-  data: function () {
-    return {
-      cx: 0.5,
-      cy: 0.5,
-      fr: 0.28,
-      fx: 0.5,
-      fy: 0.5,
-      radius: 0.5,
-    };
-  },
-  watch: {
-    radius: function radius(v) {
-      console.log(`bb ${v}1`);
+<script lang="ts">
+import { defineComponent } from "vue";
+
+export default defineComponent({
+    name: "HelloWorld",
+    props: {},
+    data: function () {
+        return {
+            cx: 0.7,
+            cy: 0.56,
+            fr: 0.02,
+            fx: 0.5,
+            fy: 0.5,
+            radius: 0.5,
+        };
     },
-  },
-};
+    watch: {
+        radius: function radius(v) {
+            console.log(`bb ${v}1`);
+        },
+    },
+});
 </script>
 
 <style lang="scss">
 .controls {
-  display: grid;
-  justify-content: center;
-  justify-items: center;
-  gap: 0.4em 1em;
-  grid-template-columns: 120px min-content 40px;
+    display: grid;
+    justify-content: center;
+    justify-items: center;
+    gap: 0.4em 1em;
+    grid-template-columns: 120px min-content 40px;
 
-  .ct-title {
-    justify-self: center;
-  }
+    .ct-title {
+        justify-self: center;
+    }
 
-  .ct-val {
-    width: 3em;
-    text-align: center;
-  }
+    .ct-val {
+        width: 3em;
+        text-align: center;
+    }
 }
 
 svg {
-  width: 300px;
-  height: 300px;
+    width: 300px;
+    height: 300px;
 }
 </style>
