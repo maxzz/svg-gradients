@@ -1,25 +1,30 @@
 <template>
-    <HelloWorld />
+    <RadialGradientEditor />
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import HelloWorld from "./components/HelloWorld.vue";
+import RadialGradientEditor from "./components/RadialGradientEditor.vue";
 
 export default defineComponent({
     name: "App",
     components: {
-        HelloWorld,
+        RadialGradientEditor,
     },
 });
 </script>
 
 <style lang="scss">
+* {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+}
 #app {
     font-family: Avenir, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    text-align: center;
+    
     color: #2c3e50;
 }
 </style>
