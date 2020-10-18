@@ -20,8 +20,12 @@
                 v-for="(stripe, index) of currentStripes"
                 :key="index"
             >
-                <circle :cx="posCircle(stripe.val)" cy="20" r="5%" fill="gray" stroke-width=1 stroke="red" />
-                <rect :x="`${posPin(stripe.val)}`" y="20" width="1%" height="40" fill="red" />
+                <circle :cx="posCircle(stripe.val)" cy="25" r="6" :fill="stripe.color" stroke-width="1" stroke="black"
+                    @mousedown="onMouseDown"
+                    @mouseup="onMouseUp"
+                    @mouseover="onMouseOver"
+                />
+                <rect :x="`${posPin(stripe.val)}`" y="31" width=".5%" height="40" fill="black" /> <!-- <circle y=25> + <circle r=6> -->
             </template>
 
             <rect x="5%" y="50%" width="90%" height="40%" fill="url(#pal)" />
@@ -38,12 +42,12 @@ type ColorStop = {
 };
 
 const enum SIZES {
-    pinWidth = 1,
-    pinWidthHalf = 0.5,
+    pinWidth = .5, // in percents; should be matched with html
     left = 5,
     leftCircle = left + pinWidth / 2,
     right = 5,
     newRange = 100 - left - right - pinWidth,
+    oldRange = 100,
 }
 
 const defaultPalette = [
@@ -77,21 +81,30 @@ export default defineComponent({
             return stripes.value.length ? stripes.value : defaultPalette;
         });
 
-        function pos(val: string | number): number {
-            return +val * SIZES.newRange / 100; // val * (<new range=89> = 100 - <left=5> - <right=5> - <pin width=1>) / <old range=100>
+        const pos = (val: string | number): number => +val * SIZES.newRange / SIZES.oldRange;
+        const posCircle = (val: string | number): string => `${SIZES.leftCircle + pos(val)}%`;
+        const posPin = (val: string | number): string => `${SIZES.left + pos(val)}%`;
+
+        function onMouseDown(ev: MouseEvent) {
+            console.log('d');
         }
-        function posCircle(val: string | number): string {
-            return `${SIZES.leftCircle + pos(val)}%`; // val * (<new range=89> = 100 - <left=5> - <right=5> - <pin width=1>) / <old range=100> + <left=5> + <pin width=1> / 2
+        function onMouseUp(ev: MouseEvent) {
+            console.log('u');
         }
-        function posPin(val: string | number): string {
-            return `${SIZES.left + pos(val)}%`; // val * (<new range=89> = 100 - <left=5> - <right=5> - <pin width=1>) / <old range=100> + <left=5>
+        function onMouseOver(ev: MouseEvent) {
+            console.log('o');
         }
 
         return {
             stripes,
             currentStripes,
+            
             posPin,
             posCircle,
+
+            onMouseDown,
+            onMouseUp,
+            onMouseOver,
         };
     },
 });
