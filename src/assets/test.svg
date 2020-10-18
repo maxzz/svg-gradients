@@ -10,6 +10,6 @@
             <stop offset="100%" stop-color="gold" />
         </linearGradient>
     </defs>
-    <circle cx="5%" cy="20" r="7%" />>
+    <circle cx="5%" cy="20" r="7%" stroke="red" />>
     <rect x="5%" y="50%" width="90%" height="40%" fill="url(#pal)" />
 </svg>
