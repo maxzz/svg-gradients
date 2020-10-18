@@ -52,11 +52,19 @@
       <!-- using my radial gradient -->
       <circle cx="5" cy="5" r="4" fill="url('#myGradient')" />
     </svg>
+
+    <div class="controls">
+        <template v-for="(def, index) of defs" :key="index">
+            <input type="range" v-model="def.value" :min="def.min" :max="def.max" :step="def.step" />
+            <div class="ct-title">{{def.label}}</div>
+            <input type="text" class="ct-val" v-model="def.value" />
+        </template>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, reactive } from "vue";
 
 export default defineComponent({
     name: "HelloWorld",
@@ -75,6 +83,72 @@ export default defineComponent({
         radius: function radius(v) {
             console.log(`bb ${v}1`);
         },
+    },
+    setup() {
+        type SliderValue = {
+            label: string;
+            value: number;
+            min: number;
+            max: number;
+            step: number;
+        };
+
+        type sliders = {
+            cx: SliderValue;
+            cy: SliderValue;
+            r: SliderValue;
+            fx: SliderValue;
+            fy: SliderValue;
+            fr: SliderValue;
+        };
+
+        let defs = reactive<SliderValue[]>([
+            {
+                label: 'cx',
+                value: 0.7,
+                min: 0.01,
+                max: 4,
+                step: 0.01,
+            },
+            {
+                label: 'cy',
+                value: 0.56,
+                min: 0.01,
+                max: 4,
+                step: 0.01,
+            },
+            {
+                label: 'fr',
+                value: 0.02,
+                min: 0.01,
+                max: 1,
+                step: 0.01,
+            },
+            {
+                label: 'fx',
+                value: 0.5,
+                min: 0.01,
+                max: 2,
+                step: 0.001,
+            },
+            {
+                label: 'fy',
+                value: 0.5,
+                min: 0.01,
+                max: 2,
+                step: 0.001,
+            },
+            {
+                label: 'r',
+                value: 0.5,
+                min: 0.01,
+                max: 4,
+                step: 0.01,
+            },
+        ]);
+        return {
+            defs,
+        }
     },
 });
 </script>
