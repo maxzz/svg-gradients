@@ -20,8 +20,8 @@
                 v-for="(stripe, index) of currentStripes"
                 :key="index"
             >
-                <circle :cx="`${+stripe.val + 5}%`" cy="20" r="5%" />
-                <rect :x="`${stripe.val}%`" y="0" width="2" height="40" fill="red" />
+                <circle :cx="posCircle(stripe.val)" cy="20" r="5%" />
+                <rect :x="`${posPin(stripe.val)}`" y="0" width="1%" height="40" fill="red" />
             </template>
 
             <rect x="5%" y="50%" width="90%" height="40%" fill="url(#pal)" />
@@ -43,6 +43,10 @@ const defaultPalette = [
         color: "red",
     },
     {
+        val: "50",
+        color: "blue",
+    },
+    {
         val: "100",
         color: "gold",
     },
@@ -56,9 +60,22 @@ export default defineComponent({
             return stripes.value.length ? stripes.value : defaultPalette;
         });
 
+        function posCircle(val: string | number): string {
+            let curr = +val;
+            curr = 5.5 + curr * (89) / 100; // val * (<new range=89> = 100 - <left=5> - <right=5> - <pin width=1>) / <old range=100> + <left=5> + <pin width=1> / 2
+            return `${curr}%`;
+        }
+        function posPin(val: string | number): string {
+            let curr = +val;
+            curr = 5 + curr * 89 / 100; // val * (<new range=89> = 100 - <left=5> - <right=5> - <pin width=1>) / <old range=100> + <left=5>
+            return `${curr}%`;
+        }
+
         return {
             stripes,
             currentStripes,
+            posPin,
+            posCircle,
         };
     },
 });
