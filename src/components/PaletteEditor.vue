@@ -4,6 +4,11 @@
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 200 80"
             class="palette-svg"
+            ref="svg"
+            @mousedown="onDragPinStart"
+            @mousemove="onDragPin"
+            @mouseup="onDragPinEnd"
+            @mouseleave="onDragPinEnd"
         >
             <defs>
                 <linearGradient id="pal">
@@ -16,16 +21,25 @@
                 </linearGradient>
             </defs>
 
-            <template
-                v-for="(stripe, index) of currentStripes"
-                :key="index"
-            >
-                <circle :cx="posCircle(stripe.val)" cy="25" r="6" :fill="stripe.color" stroke-width="1" stroke="black"
-                    @mousedown="onMouseDown"
-                    @mouseup="onMouseUp"
-                    @mouseover="onMouseOver"
-                />
-                <rect :x="`${posPin(stripe.val)}`" y="31" width=".5%" height="40" fill="black" /> <!-- <circle y=25> + <circle r=6> -->
+            <template v-for="(stripe, index) of currentStripes" :key="index">
+                <g class="draggable-group">
+                    <circle
+                        :cx="posCircle(stripe.val)"
+                        cy="25"
+                        r="6"
+                        :fill="stripe.color"
+                        stroke-width="1"
+                        stroke="black"
+                    />
+                    <rect
+                        :x="`${posPin(stripe.val)}`"
+                        y="31"
+                        width=".5%"
+                        height="40"
+                        fill="black"
+                    />
+                </g>
+                <!-- <circle y=25> + <circle r=6> -->
             </template>
 
             <rect x="5%" y="50%" width="90%" height="40%" fill="url(#pal)" />
@@ -42,7 +56,7 @@ type ColorStop = {
 };
 
 const enum SIZES {
-    pinWidth = .5, // in percents; should be matched with html
+    pinWidth = 0.5, // in percents; should be matched with html
     left = 5,
     leftCircle = left + pinWidth / 2,
     right = 5,
@@ -73,6 +87,33 @@ const defaultPalette = [
     },
 ];
 
+// type colorStop = {
+//     stop: number; //[0..1]
+//     color: string;
+// };
+
+// function GradientReader(colorStops: colorStop[]) {
+
+//     var canvas = document.createElement('canvas'),     // create canvas element
+//         ctx = canvas.getContext('2d')!,                // get context
+//         gr = ctx.createLinearGradient(0, 0, 101, 0),   // create a gradient
+//         i = 0, cs;
+
+//     canvas.width = 101;                                // 101 pixels incl.
+//     canvas.height = 1;                                 // as the gradient
+
+//     for(; cs = colorStops[i++];)                       // add color stops
+//         gr.addColorStop(cs.stop, cs.color);
+
+//     ctx.fillStyle = gr;                                // set as fill style
+//     ctx.fillRect(0, 0, 101, 1);                        // draw a single line
+
+//     // method to get color of gradient at % position [0, 100]
+//     this.getColor = function(pst: number) {
+//         return ctx.getImageData(pst|0, 0, 1, 1).data;
+//     };
+// }        
+
 export default defineComponent({
     setup() {
         let stripes = ref<ColorStop[]>([]);
@@ -81,30 +122,90 @@ export default defineComponent({
             return stripes.value.length ? stripes.value : defaultPalette;
         });
 
-        const pos = (val: string | number): number => +val * SIZES.newRange / SIZES.oldRange;
+        const pos = (val: string | number): number =>
+            (+val * SIZES.newRange) / SIZES.oldRange;
         const posCircle = (val: string | number): string => `${SIZES.leftCircle + pos(val)}%`;
         const posPin = (val: string | number): string => `${SIZES.left + pos(val)}%`;
 
-        function onMouseDown(ev: MouseEvent) {
-            console.log('d');
+        let svg = ref<SVGSVGElement>(null as any);
+
+        function getMousePosition(svg: SVGSVGElement, evt: MouseEvent) {
+            var CTM = svg.getScreenCTM()!;
+
+            if (((evt as any) as TouchEvent).touches) {
+                evt = (((evt as any) as TouchEvent).touches[0] as any) as MouseEvent;
+            }
+
+            return {
+                x: (evt.clientX - CTM.e) / CTM.a,
+                y: (evt.clientY - CTM.f) / CTM.d,
+            };
         }
-        function onMouseUp(ev: MouseEvent) {
-            console.log('u');
+
+        let selectedElement: SVGGraphicsElement, offset: {x: number, y: number}, transform: SVGTransform;
+
+        function initialiseDragging(evt: MouseEvent) {
+            offset = getMousePosition(svg.value, evt);
+            // Make sure the first transform on the element is a translate transform
+            var transforms = selectedElement.transform.baseVal;
+            if (
+                (transforms as any).length === 0 ||
+                transforms.getItem(0).type !==
+                    SVGTransform.SVG_TRANSFORM_TRANSLATE
+            ) {
+                // Create an transform that translates by (0, 0)
+                var translate = svg.value.createSVGTransform();
+                translate.setTranslate(0, 0);
+                selectedElement.transform.baseVal.insertItemBefore(translate, 0);
+            }
+            // Get initial translation
+            transform = transforms.getItem(0);
+            offset.x -= transform.matrix.e;
+            offset.y -= transform.matrix.f;
         }
-        function onMouseOver(ev: MouseEvent) {
-            console.log('o');
+
+        function onDragPinStart(evt: MouseEvent) {
+            //event.target && ((event.target as HTMLElement).style.opacity = '.5');
+
+            if ((evt.target as HTMLElement)?.classList.contains("draggable")) {
+                selectedElement = evt.target as SVGGraphicsElement;
+                initialiseDragging(evt);
+                console.log("drag start", svg.value);
+            } else if (((evt.target as Node)?.parentNode as HTMLElement)?.classList.contains("draggable-group")) {
+                selectedElement = (evt.target as Node)?.parentNode as SVGGraphicsElement;
+                initialiseDragging(evt);
+                console.log("drag start", svg.value);
+            }
+        }
+        function onDragPin(evt: MouseEvent) {
+            if (selectedElement) {
+                evt.preventDefault();
+                var coord = getMousePosition(svg.value, evt);
+                //transform.setTranslate(coord.x - offset.x, coord.y - offset.y);
+                transform.setTranslate(coord.x - offset.x, 0);
+
+                console.log("drag", coord.x, offset.x, coord.x - offset.x);
+            }
+        }
+        function onDragPinEnd(evt: MouseEvent) {
+            if (selectedElement) {
+                console.log("drag end");
+            }
+            selectedElement = null as any;
         }
 
         return {
             stripes,
             currentStripes,
-            
+
             posPin,
             posCircle,
 
-            onMouseDown,
-            onMouseUp,
-            onMouseOver,
+            onDragPinStart,
+            onDragPinEnd,
+            onDragPin,
+
+            svg,
         };
     },
 });
