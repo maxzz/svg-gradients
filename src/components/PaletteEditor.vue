@@ -45,7 +45,7 @@
             <rect x="5%" y="50%" width="90%" height="40%" fill="url(#pal)" />
         </svg>
 
-        <canvas ref="canvas" width="200" height="80"></canvas>
+        <canvas ref="canvas" width="200" height="80" @mousemove="canvasMousemove"></canvas>
     </div>
 </template>
 
@@ -223,6 +223,8 @@ export default defineComponent({
         });
 
         function drawStripes(ctx: CanvasRenderingContext2D, stripes: ColorStop[]) {
+            console.log('draw');
+
             let w = canvas.value.width;
             let h = canvas.value.height;
 
@@ -231,6 +233,11 @@ export default defineComponent({
             stripes.forEach((_) => gr.addColorStop(_.val, _.color));
             ctx.fillStyle = gr;
             ctx.fillRect(0, 40, w, h);
+
+            ctx.beginPath();
+            ctx.rect(0, 0, 20, 20);
+            ctx.fillStyle = currentColor.value;
+            ctx.fill();
         }
 
         watchEffect(() => {
@@ -257,6 +264,22 @@ export default defineComponent({
             console.log('WATCH canvasCtx', currentStripes.value, 'canvas', canvas.value, 'ctx', canvasCtx.value);
         });
 
+        let currentPos = ref<number>(0);
+        let currentColor = ref<string>('');
+
+        function canvasMousemove(evt: MouseEvent) {
+
+            currentPos.value = evt.offsetX;
+
+            let data = canvasCtx.value.getImageData(evt.offsetX, 50, 1, 1).data;
+
+            currentColor.value = `rgba(${data[0]}, ${data[1]}, ${data[2]}, ${data[3]})`;
+
+            drawStripes(canvasCtx.value, currentStripes.value);
+
+            console.log('mousemove', evt.offsetX, evt.offsetY, data, currentColor.value);
+        }
+
         return {
             stripes,
             currentStripes,
@@ -267,6 +290,8 @@ export default defineComponent({
             onDragPinStart,
             onDragPinEnd,
             onDragPin,
+
+            canvasMousemove,
 
             svg,
             canvas,
