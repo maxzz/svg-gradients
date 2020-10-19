@@ -15,7 +15,7 @@
                     <stop
                         v-for="(stripe, index) of currentStripes"
                         :key="index"
-                        :offset="`${stripe.val}%`"
+                        :offset="`${stripe.val * 100}%`"
                         :stop-color="stripe.color"
                     />
                 </linearGradient>
@@ -45,7 +45,7 @@
             <rect x="5%" y="50%" width="90%" height="40%" fill="url(#pal)" />
         </svg>
 
-        <canvas class="palette-canvas" ref="canvas"></canvas>
+        <canvas ref="canvas" width="200" height="80"></canvas>
     </div>
 </template>
 
@@ -53,7 +53,7 @@
 import { computed, defineComponent, onMounted, Ref, ref } from "vue";
 
 type ColorStop = {
-    val: string;
+    val: number; // [0..1]
     color: string;
 };
 
@@ -66,25 +66,25 @@ const enum SIZES {
     oldRange = 100,
 }
 
-const defaultPalette = [
+const defaultPalette: ColorStop[] = [
     {
-        val: "0",
+        val: 0,
         color: "red",
     },
     {
-        val: "50",
+        val: .5,
         color: "blue",
     },
     {
-        val: "60",
+        val: .6,
         color: "blue",
     },
     {
-        val: "60",
+        val: .6,
         color: "green",
     },
     {
-        val: "100",
+        val: 1,
         color: "gold",
     },
 ];
@@ -195,8 +195,8 @@ export default defineComponent({
         });
 
         const pos = (val: string | number): number => (+val * SIZES.newRange) / SIZES.oldRange;
-        const posCircle = (val: string | number): string => `${SIZES.leftCircle + pos(val)}%`;
-        const posPin = (val: string | number): string => `${SIZES.left + pos(val)}%`;
+        const posCircle = (val: number): string => `${SIZES.leftCircle + pos(val * 100)}%`;
+        const posPin = (val: number): string => `${SIZES.left + pos(val * 100)}%`;
 
         const svg = ref<SVGSVGElement>(null as any);
         const { onDragPinStart, onDragPinEnd, onDragPin } = useDrag(svg);
@@ -205,9 +205,6 @@ export default defineComponent({
 
         onMounted(() => {
             let ctx = canvas.value.getContext('2d');
-
-            // canvas.value.width = 200;
-            // canvas.value.height = 80;
 
             ctx.beginPath();
             ctx.rect(0, 0, 20, 20);
@@ -244,9 +241,5 @@ export default defineComponent({
         width: 200px;
         height: 80px;
         background-color: olive;
-    }
-    .palette-canvas {
-        width: 200px;
-        height: 700px;
     }
 </style>
