@@ -116,7 +116,7 @@ function GradientReader(colorStops: colorStop[]) {
     };
 }
 
-function useDrag(svg: Ref<SVGSVGElement>) {
+function useDragSvg(svg: Ref<SVGSVGElement>) {
 
     function getMousePosition(svg: SVGSVGElement, evt: MouseEvent) {
         var CTM = svg.getScreenCTM()!;
@@ -199,13 +199,18 @@ export default defineComponent({
         const posPin = (val: number): string => `${SIZES.left + pos(val * 100)}%`;
 
         const svg = ref<SVGSVGElement>(null as any);
-        const { onDragPinStart, onDragPinEnd, onDragPin } = useDrag(svg);
+        const { onDragPinStart, onDragPinEnd, onDragPin } = useDragSvg(svg);
 
         const canvas = ref<HTMLCanvasElement>(null as any);
         const canvasCtx = ref<CanvasRenderingContext2D>(null as any);
 
         onMounted(() => {
             canvasCtx.value = canvas.value.getContext('2d');
+
+            console.log('mounted', currentStripes.value, 'canvas', canvas.value, 'ctx', canvasCtx.value);
+
+            drawStripes(canvasCtx.value, currentStripes.value);
+
             // let ctx = canvasCtx.value;
             // let w = canvas.value.width;
             // let h = canvas.value.height;
@@ -217,26 +222,31 @@ export default defineComponent({
             //drawStripes(ctx);
         });
 
-        function drawStripes(ctx: CanvasRenderingContext2D) {
+        function drawStripes(ctx: CanvasRenderingContext2D, stripes: ColorStop[]) {
             let w = canvas.value.width;
             let h = canvas.value.height;
 
-            ctx.beginPath();
-            ctx.rect(0, 0, w, h);
-            ctx.fillStyle = 'red';
-            ctx.fill();
+            let gr = ctx.createLinearGradient(0, 0, w, 1);
+
+            stripes.forEach((_) => gr.addColorStop(_.val, _.color));
+            ctx.fillStyle = gr;
+            ctx.fillRect(0, 40, w, h);
         }
 
-        // watchEffect(() => {
-        //     console.log('currentStripes', currentStripes.value, 'canvas', canvas.value, 'ctx', canvasCtx.value);
+        watchEffect(() => {
+            console.log('watchEffect', currentStripes.value, 'canvas', canvas.value, 'ctx', canvasCtx.value);
 
-        //     if (canvasCtx.value) {
-        //         //drawStripes(canvasCtx.value);
-        //     }
-        // });
+            if (canvasCtx.value) {
+                drawStripes(canvasCtx.value, currentStripes.value);
+            }
+        });
 
         watch(currentStripes, () => {
             console.log('WATCH currentStripes', currentStripes.value, 'canvas', canvas.value, 'ctx', canvasCtx.value);
+        });
+
+        watch(stripes, () => {
+            console.log('WATCH stripes', currentStripes.value, 'canvas', canvas.value, 'ctx', canvasCtx.value);
         });
 
         watch(canvas, () => {
