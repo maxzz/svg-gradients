@@ -87,32 +87,32 @@ const defaultPalette = [
     },
 ];
 
-// type colorStop = {
-//     stop: number; //[0..1]
-//     color: string;
-// };
+type colorStop = {
+    stop: number; // [0..1]
+    color: string;
+};
 
-// function GradientReader(colorStops: colorStop[]) {
+function GradientReader(colorStops: colorStop[]) {
 
-//     var canvas = document.createElement('canvas'),     // create canvas element
-//         ctx = canvas.getContext('2d')!,                // get context
-//         gr = ctx.createLinearGradient(0, 0, 101, 0),   // create a gradient
-//         i = 0, cs;
+    let canvas = document.createElement('canvas');     // create canvas element
+    let ctx = canvas.getContext('2d')!;                // get context
+    let gr = ctx.createLinearGradient(0, 0, 101, 0);   // create a gradient
 
-//     canvas.width = 101;                                // 101 pixels incl.
-//     canvas.height = 1;                                 // as the gradient
+    canvas.width = 101;                                // 101 pixels incl.
+    canvas.height = 1;                                 // as the gradient
 
-//     for(; cs = colorStops[i++];)                       // add color stops
-//         gr.addColorStop(cs.stop, cs.color);
+    for (let i = 0, cs; cs; cs = colorStops[i++]) {    // add color stops
+        gr.addColorStop(cs.stop, cs.color);
+    }
 
-//     ctx.fillStyle = gr;                                // set as fill style
-//     ctx.fillRect(0, 0, 101, 1);                        // draw a single line
+    ctx.fillStyle = gr;                                // set as fill style
+    ctx.fillRect(0, 0, 101, 1);                        // draw a single line
 
-//     // method to get color of gradient at % position [0, 100]
-//     this.getColor = function(pst: number) {
-//         return ctx.getImageData(pst|0, 0, 1, 1).data;
-//     };
-// }        
+    // method to get color of gradient at % position [0, 100]
+    this.getColor = function(pst: number) {
+        return ctx.getImageData(pst | 0, 0, 1, 1).data;
+    };
+}        
 
 export default defineComponent({
     setup() {
@@ -144,17 +144,13 @@ export default defineComponent({
 
         let selectedElement: SVGGraphicsElement, offset: {x: number, y: number}, transform: SVGTransform;
 
-        function initialiseDragging(evt: MouseEvent) {
-            offset = getMousePosition(svg.value, evt);
+        function initialiseDragging(svg: SVGSVGElement, evt: MouseEvent) {
+            offset = getMousePosition(svg, evt);
             // Make sure the first transform on the element is a translate transform
             var transforms = selectedElement.transform.baseVal;
-            if (
-                (transforms as any).length === 0 ||
-                transforms.getItem(0).type !==
-                    SVGTransform.SVG_TRANSFORM_TRANSLATE
-            ) {
+            if ((transforms as any).length === 0 || transforms.getItem(0).type !== SVGTransform.SVG_TRANSFORM_TRANSLATE) {
                 // Create an transform that translates by (0, 0)
-                var translate = svg.value.createSVGTransform();
+                var translate = svg.createSVGTransform();
                 translate.setTranslate(0, 0);
                 selectedElement.transform.baseVal.insertItemBefore(translate, 0);
             }
@@ -169,11 +165,11 @@ export default defineComponent({
 
             if ((evt.target as HTMLElement)?.classList.contains("draggable")) {
                 selectedElement = evt.target as SVGGraphicsElement;
-                initialiseDragging(evt);
+                initialiseDragging(svg.value, evt);
                 console.log("drag start", svg.value);
             } else if (((evt.target as Node)?.parentNode as HTMLElement)?.classList.contains("draggable-group")) {
                 selectedElement = (evt.target as Node)?.parentNode as SVGGraphicsElement;
-                initialiseDragging(evt);
+                initialiseDragging(svg.value, evt);
                 console.log("drag start", svg.value);
             }
         }
@@ -190,8 +186,8 @@ export default defineComponent({
         function onDragPinEnd(evt: MouseEvent) {
             if (selectedElement) {
                 console.log("drag end");
+                selectedElement = null as any;
             }
-            selectedElement = null as any;
         }
 
         return {
