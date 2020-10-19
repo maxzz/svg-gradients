@@ -47,7 +47,7 @@
 
         <canvas ref="canvas" width="200" height="80" @mousemove="canvasMousemove"></canvas>
 
-        <PaletteView :stops="[ { stop: 0, color: 'red', }, { stop: 1, color: 'gold', }, ]" />
+        <PaletteView :stops="[ { stop: 0, color: 'red', }, { stop: 1, color: 'gold', }, ]" @over="onOverColor" />
     </div>
 </template>
 
@@ -284,6 +284,11 @@ export default defineComponent({
             console.log('mousemove', evt.offsetX, evt.offsetY, data, currentColor.value);
         }
 
+        function onOverColor(evt: { pos: number; color: string } ) {
+
+            console.log('from VIEW', evt.pos, evt.color);
+        }
+
         return {
             stripes,
             currentStripes,
@@ -296,6 +301,8 @@ export default defineComponent({
             onDragPin,
 
             canvasMousemove,
+
+            onOverColor,
 
             svg,
             canvas,

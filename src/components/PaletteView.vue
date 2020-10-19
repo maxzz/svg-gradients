@@ -21,7 +21,7 @@ export default defineComponent({
     //         default: () => [ { stop: 0, color: 'red', }, { stop: 1, color: 'gold', }, ]
     //     },
     // },
-    setup(props: { stops: ColorStop[] } ) { //: Readonly<{ stops: Ref<ColorStop[]> }>
+    setup(props: { stops: ColorStop[] }, { emit } ) { //: Readonly<{ stops: Ref<ColorStop[]> }>
 
         const canvas = ref<HTMLCanvasElement>(null as any);
         const canvasCtx = ref<CanvasRenderingContext2D>(null as any);
@@ -45,18 +45,11 @@ export default defineComponent({
             ctx.fillRect(0, 0, w, h);
         }
 
-        let currentPos = ref<number>(0);
-        let currentColor = ref<string>('');
-        
         function canvasMousemove(evt: MouseEvent) {
-
-            currentPos.value = evt.offsetX;
-
-            let data = canvasCtx.value.getImageData(evt.offsetX, 50, 1, 1).data;
-
-            currentColor.value = `rgba(${data[0]}, ${data[1]}, ${data[2]}, ${data[3]})`;
-
-            console.log('VIEW mousemove', evt.offsetX, evt.offsetY, data, currentColor.value);
+            let pos = evt.offsetX;
+            let d = canvasCtx.value.getImageData(pos, 0, 1, 1).data;
+            let color = `rgba(${d[0]}, ${d[1]}, ${d[2]}, ${d[3]})`;
+            emit('over', { pos, color });
         }
 
         return {
