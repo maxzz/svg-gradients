@@ -48,7 +48,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref } from "vue";
+import { computed, defineComponent, Ref, ref } from "vue";
 
 type ColorStop = {
     val: string;
@@ -112,7 +112,77 @@ function GradientReader(colorStops: colorStop[]) {
     this.getColor = function(pst: number) {
         return ctx.getImageData(pst | 0, 0, 1, 1).data;
     };
-}        
+}
+
+function useDrag(svg: Ref<SVGSVGElement>) {
+
+    function getMousePosition(svg: SVGSVGElement, evt: MouseEvent) {
+        var CTM = svg.getScreenCTM()!;
+
+        if (((evt as any) as TouchEvent).touches) {
+            evt = (((evt as any) as TouchEvent).touches[0] as any) as MouseEvent;
+        }
+
+        return {
+            x: (evt.clientX - CTM.e) / CTM.a,
+            y: (evt.clientY - CTM.f) / CTM.d,
+        };
+    }
+
+    let selectedElement: SVGGraphicsElement, offset: {x: number, y: number}, transform: SVGTransform;
+
+    function initialiseDragging(svg: SVGSVGElement, evt: MouseEvent) {
+        offset = getMousePosition(svg, evt);
+        // Make sure the first transform on the element is a translate transform
+        var transforms = selectedElement.transform.baseVal;
+        if ((transforms as any).length === 0 || transforms.getItem(0).type !== SVGTransform.SVG_TRANSFORM_TRANSLATE) {
+            // Create an transform that translates by (0, 0)
+            var translate = svg.createSVGTransform();
+            translate.setTranslate(0, 0);
+            selectedElement.transform.baseVal.insertItemBefore(translate, 0);
+        }
+        // Get initial translation
+        transform = transforms.getItem(0);
+        offset.x -= transform.matrix.e;
+        offset.y -= transform.matrix.f;
+    }
+
+    function onDragPinStart(evt: MouseEvent) {
+        //event.target && ((event.target as HTMLElement).style.opacity = '.5');
+
+        if ((evt.target as HTMLElement)?.classList.contains("draggable")) {
+            selectedElement = evt.target as SVGGraphicsElement;
+            initialiseDragging(svg.value, evt);
+            console.log("drag start", svg.value);
+        } else if (((evt.target as Node)?.parentNode as HTMLElement)?.classList.contains("draggable-group")) {
+            selectedElement = (evt.target as Node)?.parentNode as SVGGraphicsElement;
+            initialiseDragging(svg.value, evt);
+            console.log("drag start", svg.value);
+        }
+    }
+    function onDragPin(evt: MouseEvent) {
+        if (selectedElement) {
+            evt.preventDefault();
+            var coord = getMousePosition(svg.value, evt);
+            //transform.setTranslate(coord.x - offset.x, coord.y - offset.y);
+            transform.setTranslate(coord.x - offset.x, 0);
+
+            console.log("drag", coord.x, offset.x, coord.x - offset.x);
+        }
+    }
+    function onDragPinEnd(evt: MouseEvent) {
+        if (selectedElement) {
+            console.log("drag end");
+            selectedElement = null as any;
+        }
+    }
+
+    return {
+        onDragPinStart,
+        onDragPin,
+        onDragPinEnd,
+    };
+}
 
 export default defineComponent({
     setup() {
@@ -127,68 +197,9 @@ export default defineComponent({
         const posCircle = (val: string | number): string => `${SIZES.leftCircle + pos(val)}%`;
         const posPin = (val: string | number): string => `${SIZES.left + pos(val)}%`;
 
-        let svg = ref<SVGSVGElement>(null as any);
+        const svg = ref<SVGSVGElement>(null as any);
 
-        function getMousePosition(svg: SVGSVGElement, evt: MouseEvent) {
-            var CTM = svg.getScreenCTM()!;
-
-            if (((evt as any) as TouchEvent).touches) {
-                evt = (((evt as any) as TouchEvent).touches[0] as any) as MouseEvent;
-            }
-
-            return {
-                x: (evt.clientX - CTM.e) / CTM.a,
-                y: (evt.clientY - CTM.f) / CTM.d,
-            };
-        }
-
-        let selectedElement: SVGGraphicsElement, offset: {x: number, y: number}, transform: SVGTransform;
-
-        function initialiseDragging(svg: SVGSVGElement, evt: MouseEvent) {
-            offset = getMousePosition(svg, evt);
-            // Make sure the first transform on the element is a translate transform
-            var transforms = selectedElement.transform.baseVal;
-            if ((transforms as any).length === 0 || transforms.getItem(0).type !== SVGTransform.SVG_TRANSFORM_TRANSLATE) {
-                // Create an transform that translates by (0, 0)
-                var translate = svg.createSVGTransform();
-                translate.setTranslate(0, 0);
-                selectedElement.transform.baseVal.insertItemBefore(translate, 0);
-            }
-            // Get initial translation
-            transform = transforms.getItem(0);
-            offset.x -= transform.matrix.e;
-            offset.y -= transform.matrix.f;
-        }
-
-        function onDragPinStart(evt: MouseEvent) {
-            //event.target && ((event.target as HTMLElement).style.opacity = '.5');
-
-            if ((evt.target as HTMLElement)?.classList.contains("draggable")) {
-                selectedElement = evt.target as SVGGraphicsElement;
-                initialiseDragging(svg.value, evt);
-                console.log("drag start", svg.value);
-            } else if (((evt.target as Node)?.parentNode as HTMLElement)?.classList.contains("draggable-group")) {
-                selectedElement = (evt.target as Node)?.parentNode as SVGGraphicsElement;
-                initialiseDragging(svg.value, evt);
-                console.log("drag start", svg.value);
-            }
-        }
-        function onDragPin(evt: MouseEvent) {
-            if (selectedElement) {
-                evt.preventDefault();
-                var coord = getMousePosition(svg.value, evt);
-                //transform.setTranslate(coord.x - offset.x, coord.y - offset.y);
-                transform.setTranslate(coord.x - offset.x, 0);
-
-                console.log("drag", coord.x, offset.x, coord.x - offset.x);
-            }
-        }
-        function onDragPinEnd(evt: MouseEvent) {
-            if (selectedElement) {
-                console.log("drag end");
-                selectedElement = null as any;
-            }
-        }
+        const { onDragPinStart, onDragPinEnd, onDragPin } = useDrag(svg);
 
         return {
             stripes,
