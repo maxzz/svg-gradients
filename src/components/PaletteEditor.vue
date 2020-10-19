@@ -38,17 +38,19 @@
                         height="40"
                         fill="black"
                     />
+                    <!-- 31 = <circle y=25> + <circle r=6> -->
                 </g>
-                <!-- <circle y=25> + <circle r=6> -->
             </template>
 
             <rect x="5%" y="50%" width="90%" height="40%" fill="url(#pal)" />
         </svg>
+
+        <canvas class="palette-canvas" ref="canvas"></canvas>
     </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, Ref, ref } from "vue";
+import { computed, defineComponent, onMounted, Ref, ref } from "vue";
 
 type ColorStop = {
     val: string;
@@ -192,14 +194,25 @@ export default defineComponent({
             return stripes.value.length ? stripes.value : defaultPalette;
         });
 
-        const pos = (val: string | number): number =>
-            (+val * SIZES.newRange) / SIZES.oldRange;
+        const pos = (val: string | number): number => (+val * SIZES.newRange) / SIZES.oldRange;
         const posCircle = (val: string | number): string => `${SIZES.leftCircle + pos(val)}%`;
         const posPin = (val: string | number): string => `${SIZES.left + pos(val)}%`;
 
         const svg = ref<SVGSVGElement>(null as any);
-
         const { onDragPinStart, onDragPinEnd, onDragPin } = useDrag(svg);
+
+        const canvas = ref<HTMLCanvasElement>(null as any);
+
+        onMounted(() => {
+            let ctx = canvas.value.getContext('2d');
+
+            // canvas.value.width = 200;
+            // canvas.value.height = 80;
+
+            ctx.beginPath();
+            ctx.rect(0, 0, 20, 20);
+            ctx.stroke();
+        });
 
         return {
             stripes,
@@ -213,22 +226,27 @@ export default defineComponent({
             onDragPin,
 
             svg,
+            canvas,
         };
     },
 });
 </script>
 
 <style lang="scss">
-.palette-editor {
-    position: relative;
-    margin: 0 auto;
-    width: 90vw;
-    height: 100px;
-    background-color: rgba(255, 99, 71, 0.329);
-}
-.palette-svg {
-    width: 200px;
-    height: 80px;
-    background-color: olive;
-}
+    .palette-editor {
+        position: relative;
+        margin: 0 auto;
+        width: 90vw;
+        height: 100px;
+        background-color: rgba(255, 99, 71, 0.329);
+    }
+    .palette-svg {
+        width: 200px;
+        height: 80px;
+        background-color: olive;
+    }
+    .palette-canvas {
+        width: 200px;
+        height: 700px;
+    }
 </style>
