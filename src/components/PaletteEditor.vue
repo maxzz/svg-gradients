@@ -46,11 +46,14 @@
         </svg>
 
         <canvas ref="canvas" width="200" height="80" @mousemove="canvasMousemove"></canvas>
+
+        <PaletteView :stops="[ { stop: 0, color: 'red', }, { stop: 1, color: 'gold', }, ]" />
     </div>
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, Ref, ref, watch, watchEffect } from "vue";
+import PaletteView from "./PaletteView.vue";
 
 type ColorStop = {
     val: number; // [0..1]
@@ -187,6 +190,7 @@ function useDragSvg(svg: Ref<SVGSVGElement>) {
 }
 
 export default defineComponent({
+    components: { PaletteView },
     setup() {
         let stripes = ref<ColorStop[]>([]);
 
@@ -241,28 +245,28 @@ export default defineComponent({
         }
 
         watchEffect(() => {
-            console.log('watchEffect', currentStripes.value, 'canvas', canvas.value, 'ctx', canvasCtx.value);
+            //console.log('watchEffect', currentStripes.value, 'canvas', canvas.value, 'ctx', canvasCtx.value);
 
             if (canvasCtx.value) {
                 drawStripes(canvasCtx.value, currentStripes.value);
             }
         });
 
-        watch(currentStripes, () => {
-            console.log('WATCH currentStripes', currentStripes.value, 'canvas', canvas.value, 'ctx', canvasCtx.value);
-        });
+        // watch(currentStripes, () => {
+        //     console.log('WATCH currentStripes', currentStripes.value, 'canvas', canvas.value, 'ctx', canvasCtx.value);
+        // });
 
-        watch(stripes, () => {
-            console.log('WATCH stripes', currentStripes.value, 'canvas', canvas.value, 'ctx', canvasCtx.value);
-        });
+        // watch(stripes, () => {
+        //     console.log('WATCH stripes', currentStripes.value, 'canvas', canvas.value, 'ctx', canvasCtx.value);
+        // });
 
-        watch(canvas, () => {
-            console.log('WATCH canvas', currentStripes.value, 'canvas', canvas.value, 'ctx', canvasCtx.value);
-        });
+        // watch(canvas, () => {
+        //     console.log('WATCH canvas', currentStripes.value, 'canvas', canvas.value, 'ctx', canvasCtx.value);
+        // });
 
-        watch(canvasCtx, () => {
-            console.log('WATCH canvasCtx', currentStripes.value, 'canvas', canvas.value, 'ctx', canvasCtx.value);
-        });
+        // watch(canvasCtx, () => {
+        //     console.log('WATCH canvasCtx', currentStripes.value, 'canvas', canvas.value, 'ctx', canvasCtx.value);
+        // });
 
         let currentPos = ref<number>(0);
         let currentColor = ref<string>('');
