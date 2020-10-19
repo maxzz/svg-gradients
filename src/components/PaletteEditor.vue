@@ -50,7 +50,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, Ref, ref } from "vue";
+import { computed, defineComponent, onMounted, Ref, ref, watch, watchEffect } from "vue";
 
 type ColorStop = {
     val: number; // [0..1]
@@ -202,13 +202,49 @@ export default defineComponent({
         const { onDragPinStart, onDragPinEnd, onDragPin } = useDrag(svg);
 
         const canvas = ref<HTMLCanvasElement>(null as any);
+        const canvasCtx = ref<CanvasRenderingContext2D>(null as any);
 
         onMounted(() => {
-            let ctx = canvas.value.getContext('2d');
+            canvasCtx.value = canvas.value.getContext('2d');
+            // let ctx = canvasCtx.value;
+            // let w = canvas.value.width;
+            // let h = canvas.value.height;
+
+            // ctx.beginPath();
+            // ctx.rect(0, 0, w, h);
+            // ctx.stroke();
+
+            //drawStripes(ctx);
+        });
+
+        function drawStripes(ctx: CanvasRenderingContext2D) {
+            let w = canvas.value.width;
+            let h = canvas.value.height;
 
             ctx.beginPath();
-            ctx.rect(0, 0, 20, 20);
-            ctx.stroke();
+            ctx.rect(0, 0, w, h);
+            ctx.fillStyle = 'red';
+            ctx.fill();
+        }
+
+        // watchEffect(() => {
+        //     console.log('currentStripes', currentStripes.value, 'canvas', canvas.value, 'ctx', canvasCtx.value);
+
+        //     if (canvasCtx.value) {
+        //         //drawStripes(canvasCtx.value);
+        //     }
+        // });
+
+        watch(currentStripes, () => {
+            console.log('WATCH currentStripes', currentStripes.value, 'canvas', canvas.value, 'ctx', canvasCtx.value);
+        });
+
+        watch(canvas, () => {
+            console.log('WATCH canvas', currentStripes.value, 'canvas', canvas.value, 'ctx', canvasCtx.value);
+        });
+
+        watch(canvasCtx, () => {
+            console.log('WATCH canvasCtx', currentStripes.value, 'canvas', canvas.value, 'ctx', canvasCtx.value);
         });
 
         return {
