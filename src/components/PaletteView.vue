@@ -46,10 +46,12 @@ export default defineComponent({
         }
 
         function canvasMousemove(evt: MouseEvent) {
-            let pos = evt.offsetX;
-            let d = canvasCtx.value.getImageData(pos, 0, 1, 1).data;
+            let x = Math.abs(evt.offsetX); // to avoid -0
+            let d = canvasCtx.value.getImageData(x, 0, 1, 1).data;
             let color = `rgba(${d[0]}, ${d[1]}, ${d[2]}, ${d[3]})`;
-            emit('over', { pos, color });
+
+            let pos = Math.ceil( x / canvas.value.width * 100);
+            emit('over', { pos, color, x });
         }
 
         return {

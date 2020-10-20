@@ -284,9 +284,9 @@ export default defineComponent({
             console.log('mousemove', evt.offsetX, evt.offsetY, data, currentColor.value);
         }
 
-        function onOverColor(evt: { pos: number; color: string } ) {
+        function onOverColor(evt: { x: number; pos: number; color: string } ) {
 
-            console.log('from VIEW', evt.pos, evt.color);
+            console.log(`from VIEW x:${evt.x} idx:${evt.pos} color:${evt.color}`);
         }
 
         return {
