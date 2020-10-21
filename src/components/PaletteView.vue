@@ -6,7 +6,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, Ref, ref, PropType } from "vue";
+import { defineComponent, onMounted, Ref, ref, PropType, onBeforeUnmount } from "vue";
 
 export type ColorStop = {
     stop: number; // [0..1]
@@ -30,6 +30,11 @@ export default defineComponent({
         const canvas = ref<HTMLCanvasElement>(null as any);
         const canvasCtx = ref<CanvasRenderingContext2D>(null as any);
 
+        let ro = new ResizeObserver(entries => {
+            console.log('observe');
+            canvasResize();
+        });
+
         onMounted(() => {
             canvasCtx.value = canvas.value.getContext('2d');
 
@@ -37,11 +42,13 @@ export default defineComponent({
 
             drawStops(canvasCtx.value, props.stops);
 
-            let ro = new ResizeObserver(entries => {
-                console.log('observe');
-                canvasResize();
-            });
             ro.observe(canvas.value);
+        });
+
+        onBeforeUnmount(() => {
+            if (ro) {
+                ro.disconnect();
+            }
         });
 
         function canvasResize() {
@@ -50,6 +57,8 @@ export default defineComponent({
                 return;
             }
 
+            console.log('VIEW redraw'); //TODO: color should be detected on a separate canvas to avoid stretch issues.
+
             const width = canvas.value.clientWidth;
             const height = canvas.value.clientHeight;
 
@@ -57,7 +66,7 @@ export default defineComponent({
                 canvas.value.width = width;
                 canvas.value.height = height;
 
-                console.log('VIEW redraw'); //TODO: color should be detected on a separate canvas to avoid stretch issues.
+                
 
                 drawStops(canvasCtx.value, props.stops);
             }
