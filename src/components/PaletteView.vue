@@ -1,6 +1,7 @@
 <template>
     <div>
-        <canvas ref="canvas" width="200" height="80" @mousemove="canvasMousemove"></canvas>
+        <canvas ref="canvas" @mousemove="canvasMousemove" style="width: 300px; height: 20px;" ></canvas>
+        <!-- <canvas ref="canvas" width="200" height="80" @mousemove="canvasMousemove" @resize="canvasResize" style="display: block; width: 100px; height: 20px;" ></canvas> -->
     </div>
 </template>
 
@@ -55,9 +56,23 @@ export default defineComponent({
             emit('over', { pos, color, x });
         }
 
+        function canvasResize() {
+            // 0. resizeCanvasToDisplaySize: look up the size the canvas is being displayed and if it's resolution does not match change it.
+            const width = canvas.value.clientWidth;
+            const height = canvas.value.clientHeight;
+
+            if (canvas.value.width !== width || canvas.value.height !== height) {
+                canvas.value.width = width;
+                canvas.value.height = height;
+                console.log('VIEW redraw');
+                drawStops(canvasCtx.value, props.stops);
+            }
+        }        
+
         return {
             canvas,
             canvasMousemove,
+            canvasResize,
         };
     },
 });

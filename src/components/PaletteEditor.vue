@@ -15,7 +15,7 @@
                     <stop
                         v-for="(stripe, index) of currentStripes"
                         :key="index"
-                        :offset="`${stripe.val * 100}%`"
+                        :offset="`${stripe.stop * 100}%`"
                         :stop-color="stripe.color"
                     />
                 </linearGradient>
@@ -24,7 +24,7 @@
             <template v-for="(stripe, index) of currentStripes" :key="index">
                 <g class="draggable-group">
                     <circle
-                        :cx="posCircle(stripe.val)"
+                        :cx="posCircle(stripe.stop)"
                         cy="25"
                         r="6"
                         :fill="stripe.color"
@@ -32,7 +32,7 @@
                         stroke="black"
                     />
                     <rect
-                        :x="`${posPin(stripe.val)}`"
+                        :x="`${posPin(stripe.stop)}`"
                         y="31"
                         width=".5%"
                         height="40"
@@ -47,19 +47,15 @@
 
         <canvas ref="canvas" width="200" height="80" @mousemove="canvasMousemove"></canvas>
 
-        <PaletteView @over="onOverColor" />
+        <PaletteView @over="onOverColor" :stops="defaultPalette" />
+        <!-- <PaletteView @over="onOverColor" /> -->
         <!-- <PaletteView :stops="[ { stop: 0, color: 'red', }, { stop: 1, color: 'gold', }, ]" @over="onOverColor" /> -->
     </div>
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, Ref, ref, watch, watchEffect } from "vue";
-import PaletteView from "./PaletteView.vue";
-
-type ColorStop = {
-    val: number; // [0..1]
-    color: string;
-};
+import PaletteView, { ColorStop } from "./PaletteView.vue";
 
 const enum SIZES {
     pinWidth = 0.5, // in percents; should be matched with html
@@ -72,33 +68,48 @@ const enum SIZES {
 
 const defaultPalette: ColorStop[] = [
     {
-        val: 0,
+        stop: 0,
         color: "red",
     },
     {
-        val: .5,
+        stop: .2,
         color: "blue",
     },
     {
-        val: .6,
+        stop: .3,
         color: "blue",
     },
     {
-        val: .6,
+        stop: .6,
         color: "green",
     },
     {
-        val: 1,
+        stop: .6,
         color: "gold",
+    },
+    {
+        stop: .8,
+        color: "gold",
+    },
+    {
+        stop: .8,
+        color: "black",
+    },
+    {
+        stop: .99,
+        color: "black",
+    },
+    {
+        stop: .99,
+        color: "red",
+    },
+    {
+        stop: .99,
+        color: "red",
     },
 ];
 
-type colorStop = {
-    stop: number; // [0..1]
-    color: string;
-};
-
-function GradientReader(colorStops: colorStop[]) {
+function GradientReader(colorStops: ColorStop[]) {
 
     let canvas = document.createElement('canvas');     // create canvas element
     let ctx = canvas.getContext('2d')!;                // get context
@@ -235,7 +246,7 @@ export default defineComponent({
 
             let gr = ctx.createLinearGradient(0, 0, w, 1);
 
-            stripes.forEach((_) => gr.addColorStop(_.val, _.color));
+            stripes.forEach((_) => gr.addColorStop(_.stop, _.color));
             ctx.fillStyle = gr;
             ctx.fillRect(0, 40, w, h);
 
@@ -307,6 +318,8 @@ export default defineComponent({
 
             svg,
             canvas,
+
+            defaultPalette,
         };
     },
 });
