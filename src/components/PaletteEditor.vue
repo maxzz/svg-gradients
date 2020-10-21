@@ -47,7 +47,8 @@
 
         <canvas ref="canvas" width="200" height="80" @mousemove="canvasMousemove"></canvas>
 
-        <PaletteView :stops="[ { stop: 0, color: 'red', }, { stop: 1, color: 'gold', }, ]" @over="onOverColor" />
+        <PaletteView @over="onOverColor" />
+        <!-- <PaletteView :stops="[ { stop: 0, color: 'red', }, { stop: 1, color: 'gold', }, ]" @over="onOverColor" /> -->
     </div>
 </template>
 

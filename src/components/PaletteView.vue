@@ -13,14 +13,14 @@ export type ColorStop = {
 };
 
 export default defineComponent({
-    props: [ 'stops' ],
-    // props: {
-    //     stops: {
-    //         type: Object,
-    //         required: false,
-    //         default: () => [ { stop: 0, color: 'red', }, { stop: 1, color: 'gold', }, ]
-    //     },
-    // },
+    //props: [ 'stops' ],
+    props: {
+        stops: {
+            type: Array as () => ColorStop[],
+            required: false,
+            default: () => [ { stop: 0, color: 'green', }, { stop: 1, color: 'gold', }, ]
+        },
+    },
     setup(props: { stops: ColorStop[] }, { emit } ) { //: Readonly<{ stops: Ref<ColorStop[]> }>
 
         const canvas = ref<HTMLCanvasElement>(null as any);
