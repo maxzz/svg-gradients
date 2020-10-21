@@ -13,6 +13,8 @@ export type ColorStop = {
     color: string;
 };
 
+declare var ResizeObserver;
+
 export default defineComponent({
     //props: [ 'stops' ],
     props: {
@@ -34,7 +36,32 @@ export default defineComponent({
             console.log('MOUNTED VIEW', props.stops, 'canvas', canvas.value, 'ctx', canvasCtx.value);
 
             drawStops(canvasCtx.value, props.stops);
+
+            let ro = new ResizeObserver(entries => {
+                console.log('observe');
+                canvasResize();
+            });
+            ro.observe(canvas.value);
         });
+
+        function canvasResize() {
+            // 0. resizeCanvasToDisplaySize: look up the size the canvas is being displayed and if it's resolution does not match change it.
+            if (!canvas.value) {
+                return;
+            }
+
+            const width = canvas.value.clientWidth;
+            const height = canvas.value.clientHeight;
+
+            if (canvas.value.width !== width || canvas.value.height !== height) {
+                canvas.value.width = width;
+                canvas.value.height = height;
+
+                console.log('VIEW redraw'); //TODO: color should be detected on a separate canvas to avoid stretch issues.
+
+                drawStops(canvasCtx.value, props.stops);
+            }
+        }
 
         function drawStops(ctx: CanvasRenderingContext2D, stops: ColorStop[]) {
             let w = canvas.value.width;
@@ -56,23 +83,9 @@ export default defineComponent({
             emit('over', { pos, color, x });
         }
 
-        function canvasResize() {
-            // 0. resizeCanvasToDisplaySize: look up the size the canvas is being displayed and if it's resolution does not match change it.
-            const width = canvas.value.clientWidth;
-            const height = canvas.value.clientHeight;
-
-            if (canvas.value.width !== width || canvas.value.height !== height) {
-                canvas.value.width = width;
-                canvas.value.height = height;
-                console.log('VIEW redraw');
-                drawStops(canvasCtx.value, props.stops);
-            }
-        }        
-
         return {
             canvas,
             canvasMousemove,
-            canvasResize,
         };
     },
 });
