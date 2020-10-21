@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, Ref, ref } from "vue";
+import { defineComponent, onMounted, Ref, ref, PropType } from "vue";
 
 export type ColorStop = {
     stop: number; // [0..1]
@@ -16,7 +16,8 @@ export default defineComponent({
     //props: [ 'stops' ],
     props: {
         stops: {
-            type: Array as () => ColorStop[],
+            type: Object as PropType<ColorStop[]>,
+            // type: Array as () => ColorStop[],
             required: false,
             default: () => [ { stop: 0, color: 'green', }, { stop: 1, color: 'gold', }, ]
         },
