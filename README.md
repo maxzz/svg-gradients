@@ -1,24 +1,9 @@
-# t
+## About
 
-## Project setup
-```
-yarn install
-```
+Exploring SVG Gradients.
 
-### Compiles and hot-reloads for development
-```
-yarn serve
-```
+![](src/assets/samples/2020-10-20_21-25-34.png)
 
-### Compiles and minifies for production
-```
-yarn build
-```
-
-### Lints and fixes files
-```
-yarn lint
-```
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
